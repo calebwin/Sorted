@@ -1,0 +1,138 @@
+<!DOCTYPE html>  
+<html>
+    <head>  
+        <meta charset="utf-8" />
+        <title>Sorted - Quickly find recycling locations around King County & Seattle</title>
+        <link rel="stylesheet" type="text/css" href="normalize.css" />
+        <link rel="stylesheet" type="text/css" href="skeleton.css" />
+        <link href="https://fonts.googleapis.com/css?family=Merriweather|Quicksand:400,700|VT323" rel="stylesheet">
+        <link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
+    </head>
+    
+    <style>
+        body {
+            background-color: #eeeeee;
+            font-size : 100%;
+        }
+        .pageTitle { 
+            position: relative;
+            margin-top: 25px;
+        }
+        .pageTitle h1 {
+            top: 0;
+            left: 0;
+            font-size : 13em;
+            color : #282828;
+            font-family: 'Quicksand', sans-serif;
+            font-weight:bolder;
+            text-align: center;
+        }
+        .subtitle {
+            font-size : 2em;
+            color : #282828;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: 700;
+            text-align: center;
+            -webkit-transform:translateY(-30px);
+            -ms-transform:translateY(-30px);
+            margin-bottom: -30px;
+        }
+        hr {
+            border : 3px solid #282828;
+        }
+        .sectionHeading {
+            font-size : 4em;
+            color : #282828;
+            font-family: 'Quicksand', sans-serif;
+        }
+        .sectionBody {
+            font-size : 1.5em;
+            color : #282828;
+            font-family: 'Merriweather', serif;
+        }
+        .sectionFooter {
+            font-size : 1.5em;
+            font-family: 'Merriweather', serif;
+        }
+        button {
+            width:50%;
+            color: #000;
+            background-color: #4caf50;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 10px #429345;
+            transition: all .2s ease-in-out;
+        }
+        
+        button:focus {
+            color: #000;
+        }
+
+        button:hover {
+            color: #000;
+            box-shadow: 0 8px #429345;
+            transform: translateY(2px);
+        }
+
+        button:active {
+            color: #000;
+            box-shadow: 0 5px #429345;
+            transform: translateY(5px);
+        }
+        .row, .column {
+            padding: 0px !important;
+            margin: 3px !important;
+        }
+        .column {
+            width: 32% !important;
+        }
+    </style>
+
+    <body>
+        <div class="container">
+            <div class="pageTitle">
+                <h1>SORTED</h1>
+                <!--<h1 class="titleabove">FULLSTACK</h1>-->
+            </div>
+            <h1 class="subtitle">Quickly find recycling locations around Seattle & all of King County</h1>
+            <hr />
+            <div class="row">
+                <div class="section">
+                    <p class="sectionHeading">
+                        "Where can I recycle that microwave?"
+                    </p>
+                    <p class="sectionBody">
+                        The Sorted app lets you quickly find detailed information about recycling locations near you. These recycling locations let you drop off your garbage for them to recycle. With this new recycling app, recycling is simpler and faster. And it's completely FREE with NO ads. So what are you waiting for? Start recycling and get Sorted! <i class="em em-smile"></i>
+                    </p>
+                    <p class="sectionFooter">
+                        To download the Sorted mobile app or its accompanying Alexa Skill, visit one of these links below.
+                        <div class="row">
+                            <button class="one-third column" onclick="window.open('https://rebrand.ly/sortedios')">GET THE IOS APP</button>
+                            <button class="one-third column" onclick="window.open('https://play.google.com/store/apps/details?id=com.calebwin.sorted&hl=en')">GET THE ANDROID APP</button>
+                            <button class="one-third column" onclick="window.open('https://www.amazon.com/Caleb-Sorted/dp/B071JXZ1PW/')">ENABLE THE ALEXA SKILL</button>
+                        </div>
+                        <br/>
+                        <i>This website was made using <a href="https://afeld.github.io/emoji-css/">Emoji.css</a>, <a href="https://www.getskeleton.com">Skeleton.css</a>, and <a href="https://fonts.google.com">Google Fonts</a>. Hosted by <a href="https://pages.github.com">Github Pages</a></i>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <script>
+            // Bookmark me
+            function bookmarkPage() {
+                var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+                if(isChrome) {
+                    alert("So you don't have a Gecko browser... you don't have Opera or IE... it's WebKit!... which doesn't support bookmarking a page with JS. Oh well. :/");
+                } else if (window.sidebar) { // Mozilla Firefox Bookmark
+                  window.sidebar.addPanel(location.href,document.title,"");
+                } else if(window.external) { // IE Favorite
+                  window.external.AddFavorite(location.href,document.title);
+                } else if(window.opera && window.print) { // Opera Hotlist
+                  this.title=document.title;
+                } else {
+                    alert("So you don't have a Gecko browser... you don't have Opera or IE... it's WebKit!... which doesn't support bookmarking a page with JS. Oh well. :/");
+                }                
+            }
+        </script>
+    </body>  
+</html>  
