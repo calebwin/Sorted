@@ -1,0 +1,384 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>Sorted</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.green-pink.min.css">
+    <link rel="stylesheet" href="css/index.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+
+<body>
+    <!-- The drawer is always open in large screens. The header is always shown,
+          even in small screens. -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer
+                    mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <span class="android-title mdl-layout-title mobileshow">
+                    <img class="logo-image" src="img/HeroImage2.png">
+                  </span>
+                <!--<span class="mdl-layout-title">
+                    Sorted
+                </span>-->
+                <div class="mdl-layout-spacer"></div>
+            </div>
+        </header>
+        <div class="mdl-layout__drawer">
+            <span class="mdl-layout-title drawer-header">
+              <img class="logo-image" src="img/HeroImage2.png">
+            </span>
+            <nav class="mdl-navigation">
+                <a class="mdl-navigation__link" href="mailto:calebwin@gmail.com"><span class="drawerItem"><i class="material-icons">contact_mail</i><p class="drawerItemText">Contact us</p></span></a>
+                <a class="mdl-navigation__link" href="https://www.amazon.com/Caleb-Sorted/dp/B071JXZ1PW"><span class="drawerItem"><i class="material-icons">keyboard_voice</i><p class="drawerItemText">Alexa Skill</p></span></a>
+                <a class="mdl-navigation__link" onclick="window.open('https://calebwin.github.io/Sorted', '_system');"><span class="drawerItem"><i class="material-icons">open_in_browser</i><p class="drawerItemText">Sorted.com</p></span></a>
+            </nav>
+        </div>
+        <main class="mdl-layout__content">
+            <div class="page-content">
+                <div id="loader" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
+                <div class="mdl-grid">
+                    <div class="mdl-cell mdl-cell--12-col">
+                        <div class="search">
+                            <div class="input">
+                                <span class="searchBox">
+                                    <input type="search" id="searchInp" placeholder="Where to recycle..." onsearch="quickSearch=false;findCategory()">
+                                    <!-- Colored icon button -->
+                                    <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored" onclick="quickSearch=false;findCategory()">
+                                      <i class="material-icons">search</i>
+                                    </button>
+                                    <button class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored" id="setAddressBtn"><i class="material-icons">place</i></button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mdl-grid optionsForm">
+                    <!-- Flat button with ripple -->
+                    <!--<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id="setAddressBtn"><i class="material-icons">place</i>&nbsp;&nbsp;&nbsp;&nbsp;Set Address</button>-->
+                    <!--<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" id="quickSearchBtn"><i class="material-icons">fast_forward</i>&nbsp;&nbsp;&nbsp;&nbsp;Quick Search</button>-->
+                </div>
+                <div class="categoryListContainer">
+                    <div class="categoryList" id="categoryList">
+                    </div>
+                </div>
+                <div class="mdl-grid" id="listSection">
+                    <div class="mdl-cell mdl-cell--12-col">
+                        <ul class='mdl-list' id="providerList">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+    </div>
+    <button id="demo-show-toast" class="mdl-button mdl-js-button mdl-button--raised" type="button">Show Toast</button>
+    <div id="address-toast" class="mdl-js-snackbar mdl-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+    <div id="error-toast" class="mdl-js-snackbar mdl-snackbar">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="js/index.js"></script>
+    <script src="phonegap.js"></script>
+    <script>
+        var state = "ready"; // ready -> findingUser -> searchingLoc -> ready
+        var url = "https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyCdo8FDcfT9mmKvF0JkKPNm09zf5kiXggE&address=";
+        var snackbarAddress = document.querySelector('#address-toast');
+        var snackbarError = document.querySelector('#error-toast');
+        var searchField = document.getElementById("fixed-header-drawer-exp");
+        var addressField = document.getElementById("fixed-header-drawer-exp-address");
+        var category = "Alkaline Batteries";
+        var address = "1000 4th Ave. Seatle";
+        var quickSearch = false;
+        $('#setAddressBtn').click(function() {
+            showDialog({
+                title: 'Enter your address',
+                text: '<form action="#"><div class="mdl-textfield mdl-js-textfield"><input class="mdl-textfield__input" type="text" id="addressInp"><label class="mdl-textfield__label" for="sample1">E.g. - ' + address + '</label></div></form><br><p>Enter your address so Sorted can find recycling locations nearest you. <b>It must contain at least your city.</b> Your address will not be saved.</p>',
+                negative: {
+                    title: 'Cancel'
+                },
+                positive: {
+                    title: 'Set Address',
+                    onClick: function(e) {
+                        address = document.getElementById("addressInp").value;
+                        if (address.length === 0) {
+                            address = "1000 4th Ave. Seatle";
+                            var data = {
+                                message: 'The address you entered was invalid',
+                                timeout: 4000
+                            };
+                            snackbarAddress.MaterialSnackbar.showSnackbar(data);
+                        } else {
+                            var data = {
+                                message: 'Location set to ' + address,
+                                timeout: 20000
+                            };
+                            snackbarAddress.MaterialSnackbar.showSnackbar(data);
+                        }
+                    }
+                }
+            });
+        });
+        /*$('#quickSearchBtn').click(function() {
+            quickSearch = true;
+            findCategory();
+        });*/
+
+        function findUser() {
+            if (false) {} else {
+                xmlhttp.onerror = function() {
+                    httpFail();
+                }
+                xmlhttp.open("GET", url + address, true);
+                xmlhttp.send();
+            }
+        }
+
+        function findCategory() {
+            var query = document.getElementById("searchInp").value;
+            var maxLevDist = 1000000000000000000000000000000000000000000000000000000000000000000000000000;
+            var minLCS = 0;
+            var closestMatch = 0;
+            for (var i = 0; i < items.length; i++) {
+                //var levDistance = levDist(items[i].toLowerCase(),query.toLowerCase());
+                var thisLCS = LCSS(items[i].toLowerCase(), query.toLowerCase()).toString().length;
+                /*if(levDistance<maxLevDist) {
+                    maxLevDist=levDistance;
+                    closestMatch=i;
+                }*/
+                if (thisLCS > minLCS) {
+                    minLCS = thisLCS;
+                    closestMatch = i;
+                }
+                /*if(categories[i].toLowerCase().includes(input.toLowerCase())) {
+                    category = categories[i];
+                }*/
+            }
+            category = items[closestMatch];
+            document.getElementById("searchInp").value = category;
+            document.getElementById("loader").style.visibility = "visible";
+            //$("body").css("display", "none");
+            state = "findingUser";
+            findUser();
+            /*if(body.style.opacity>=1) {
+                window.location.href = "search.html?q="+category;
+            }*/
+        }
+        var latitude = 0,
+            longitude = 0;
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                if (state === "findingUser") {
+                    var locData = JSON.parse(this.responseText);
+                    if (locData.results.length === 0) {
+                        var data = {
+                            message: 'The address you entered was invalid',
+                            timeout: 20000
+                        };
+                        snackbarError.MaterialSnackbar.showSnackbar(data);
+                        document.getElementById("loader").style.visibility = "hidden";
+                        state = "ready";
+                    } else {
+                        latitude = locData.results[0].geometry.location.lat;
+                        longitude = locData.results[0].geometry.location.lng;
+                        xmlhttp.open("GET", "https://data.kingcounty.gov/resource/tzui-ygc5.json?material_handled=" + category, true);
+                        xmlhttp.send();
+                        state = "searchingLoc";
+                    }
+                } else if (state === "searchingLoc") {
+                    var providers = JSON.parse(this.responseText);
+                    // Order providers from nearest to farthest
+                    //navigator.geolocation.getCurrentPosition(storeCoords);
+                    document.getElementById("loader").style.visibility = "hidden";
+                    if (providers.length === 0) {
+                        var data = {
+                            message: 'No locations were found. Please check you WiFi connection.',
+                            timeout: 1000
+                        };
+                        snackbarError.MaterialSnackbar.showSnackbar(data);
+                        state = "ready";
+                    } else {
+                        /*var shortestDistance = 1000000000000000000000000000000000000000000000000000000000000000000000;
+                        var closestLoc = 0;
+                        for(var i = 0; i < providers.length; i++) {
+                            var p = providers[i];
+                            var distanceFromUser;
+                            if(providers[i].mapping_location) {
+                                distanceFromUser = distanceCoords(p.mapping_location.coordinates[1],p.mapping_location.coordinates[0],latitude,longitude);
+                            } else {
+                                distanceFromUser = 0;
+                            }
+                        }*/
+                        providers.sort(function(a, b) {
+                            var distA, distB;
+                            if (a.mapping_location) {
+                                distA = distanceCoords(a.mapping_location.coordinates[1], a.mapping_location.coordinates[0], latitude, longitude);
+                            } else {
+                                distA = Infinity;
+                            }
+                            if (b.mapping_location) {
+                                distB = distanceCoords(b.mapping_location.coordinates[1], b.mapping_location.coordinates[0], latitude, longitude);
+                            } else {
+                                distB = Infinity;
+                            }
+                            return distA - distB;
+                        })
+                        state = "ready";
+                        //Populate card and list
+                        var providerList = document.getElementById("providerList");
+                        providerList.innerHTML = "";
+                        for (var i = 0; i < providers.length; i++) {
+                            var listItem = document.createElement("li");
+                            listItem.className = "mdl-list__item mdl-list__item--two-line";
+                            var primaryContent = document.createElement("span");
+                            primaryContent.className = "mdl-list__item-primary-content";
+                            var secondaryContent = document.createElement("span");
+                            secondaryContent.className = "mdl-list__item-secondary-content";
+                            var detailsBtn = document.createElement("a");
+                            detailsBtn.className = "mdl-list__item-secondary-action mdl-button--colored";
+                            detailsBtn.href = "#";
+                            var detailsIcon = document.createElement("i");
+                            detailsIcon.className = "material-icons";
+                            detailsIcon.innerHTML = "navigate_next";
+                            //detailsBtn.appendChild(detailsIcon);
+                            secondaryContent.appendChild(detailsBtn);
+                            var p = providers[i];
+                            var distanceText;
+                            if (p.mapping_location) {
+                                distanceText = Math.round(distanceCoords(p.mapping_location.coordinates[1], p.mapping_location.coordinates[0], latitude, longitude) * 0.621371) + " miles away in " + p.city;
+                            } else {
+                                distanceText = "Distance could not be calculated";
+                            }
+                            primaryContent.innerHTML = "<i class='material-icons mdl-list__item-icon'>place</i>" + p.provider_name + "<span class='mdl-list__item-sub-title'>" + distanceText + "</span>";
+                            listItem.appendChild(primaryContent);
+                            listItem.appendChild(secondaryContent);
+                            var listLink = document.createElement("a");
+                            listLink.appendChild(listItem);
+                            listLink.href = "details.html?id=" + p.providerid + "&lat=" + latitude + "&lng=" + longitude + "&category=" + category;
+                            listLink.className = "no-style-link"
+                            providerList.appendChild(listLink);
+                        }
+                        if (quickSearch) {
+                            p = providers[0];
+                            window.location.href = "details.html?id=" + p.providerid + "&lat=" + latitude + "&lng=" + longitude + "&category=" + category;
+                        }
+                        /*document.getElementById("nearestLocName").innerHTML=nearestProvider.provider_name;
+                        document.getElementById("hoursText").innerHTML=nearestProvider.hours;
+                        document.getElementById("distanceText").innerHTML="about "+Math.round(shortestDistance*0.621371)+" miles away";
+                        document.getElementById("websiteBtn").href=nearestProvider.provider_url;
+                        document.getElementById("detailsBtn").href="details.html?q="+nearestProvider.providerid+"&lat="+$.urlParam("lat")+"&lng="+$.urlParam("lng")+"&query="+$.urlParam("q");
+                        //document.getElementById("navigateClosest").href="https://maps.google.com?saddr=Current+Location&daddr="+nearestProvider.provider_address;
+                        /*if(nearestProvider.pickup_allowed===("TRUE")) {
+                            var chip = document.createElement("div");
+                            chip.className="chip";
+                            chip.innerHTML="Pickup";
+                            document.getElementById("service").appendChild(chip);
+                        }
+                        if(nearestProvider.dropoff_allowed===("TRUE")) {
+                            var chip = document.createElement("div");
+                            chip.className="chip";
+                            chip.innerHTML="Drop Off";
+                            document.getElementById("service").appendChild(chip);
+                        }
+                        if(nearestProvider.mail_in_allowed===("TRUE")) {
+                            var chip = document.createElement("div");
+                            chip.className="chip";
+                            chip.innerHTML="Mail In";
+                            document.getElementById("service").appendChild(chip);
+                        }*/
+                        /*for(var i = 1; i < providers.length; i++) {
+                            var p = providers[i];
+                            var listRow = document.createElement("a");
+                            listRow.className="collection-item";
+                            var rowTitle = document.createElement("span");
+                            rowTitle.className="title row-title";
+                            rowTitle.innerHTML=p.provider_name;
+                            var rowText = document.createElement("p");
+                            rowText.innerHTML=p.provider_address;
+                            rowText.className="row-subtitle";
+                            listRow.appendChild(rowTitle);
+                            listRow.appendChild(document.createElement("br"));
+                            listRow.appendChild(rowText);
+                            listRow.href="details.html?q="+p.providerid+"&lat="+$.urlParam("lat")+"&lng="+$.urlParam("lng")+"&query="+$.urlParam("q");
+                            resultsList.appendChild(listRow);
+                        }*/
+                    }
+                }
+            }
+        }
+
+        function httpFail() {
+            var data = {
+                message: 'No Internet connection.',
+                timeout: 2000
+            };
+            snackbarError.MaterialSnackbar.showSnackbar(data);
+            document.getElementById("loader").style.visibility = "hidden";
+        }
+        var pageTitle = document.getElementById("pageTitle");
+        $(document).ready(function() {
+            document.addEventListener('deviceready', SetStatusBarColor, false);
+            var categoryList = document.getElementById("categoryList");
+            //var totalWidth = 0;
+            for (var i = 0; i < items.length; i++) {
+                var chip = document.createElement("button");
+                chip.type = "button";
+                chip.addEventListener("click", function(e) {
+                    document.getElementById("searchInp").value = e.target.innerHTML;
+                });
+                chip.className = "mdl-chip";
+                var chipText = document.createElement("span");
+                chipText.className = "mdl-chip__text";
+                chipText.innerHTML = items[i];
+                chip.appendChild(chipText);
+                //totalWidth += chip.offsetWidth;
+                categoryList.appendChild(chip);
+            }
+            //alert(totalWidth);
+            //categoryList.width=totalWidth;
+            searchField.addEventListener("focus", function() {
+                $("#pageTitle").fadeOut(200);
+            });
+            searchField.addEventListener("blur", function() {
+                $("#pageTitle").fadeIn(200);
+            }, 5);
+            addressField.addEventListener("focus", function() {
+                $("#pageTitle").fadeOut(200);
+            });
+            addressField.addEventListener("blur", function() {
+                $("#pageTitle").fadeIn(200);
+            }, 5);
+        });
+        var permissions = cordova.plugins.permissions;
+
+        function SetStatusBarColor() {
+            if (StatusBar) {
+                StatusBar.backgroundColorByHexString("#338a3e");
+            }
+        }
+
+        function LCSS(a, b) {
+            a = a.toLowerCase();
+            b = b.toLowerCase();
+            var len = b.length,
+                originalLen = b.length;
+            do {
+                for (let i = 0; i <= originalLen - len; i++) {
+                    let needle = b.substr(i, len);
+                    if (a.indexOf(needle) !== -1) return needle;
+                }
+            } while (len-- > 0);
+            return false;
+        }
+    </script>
+</body>
+
+</html>

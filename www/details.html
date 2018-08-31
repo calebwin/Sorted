@@ -1,0 +1,208 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:300,400,500,700" type="text/css">
+	<title>Sorted</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.green-pink.min.css">
+	<link rel="stylesheet" href="css/index.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+
+<body>
+	<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header" id="page">
+		<header class="mdl-layout__header">
+			<div class="mdl-layout__header-row">
+				<a class="mdl-button mdl-js-button mdl-button--icon closeBtn" href="javascript:history.go(-1)">
+                    <i class="material-icons">close</i>
+                </a>
+				<span class="mdl-layout-title" id="providerTitle">
+            </span>
+			</div>
+		</header>
+		<main class="mdl-layout__content">
+			<div class="page-content">
+				<!-- Your content goes here -->
+                <div class="">
+                    <div class="mapCard mdl-card mdl-shadow--2dp">
+                      <div class="mapCardTitle mdl-card__title  mdl-card--expand" id="mapCardTitle">
+                        <h2 class="mdl-card__title-text" id="locName"></h2>
+                      </div>
+                      <div class="mdl-card__actions cardAction mdl-card--border">
+                        <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="navigateLink" href="javascript:alert('Directions could not be found')">
+                            Directions
+                        </a>
+                         <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" id="websiteLink2" href="javascript:alert('Website could not be found')">
+                             Website
+                         </a>
+                      </div>
+                  </div>
+                </div>
+				<div class="mdl-grid" id="listSection">
+					<div class="mdl-cell mdl-cell--12-col">
+						<ul class='mdl-list'>
+                    		<li class="mdl-list__item">
+                            	<span class="mdl-list__item-primary-content">
+                              		<i class="material-icons mdl-list__item-icon">place</i>
+                              		<span id="addressTxt"></span>
+                            	</span>
+                            </li>
+                            <li class="mdl-list__item">
+                            	<span class="mdl-list__item-primary-content">
+                              		<i class="material-icons mdl-list__item-icon">navigation</i>
+                              	<span id="distanceTxt"></span>
+                            </span>
+                            </li>
+                            <li class="mdl-list__item">
+                            	<span class="mdl-list__item-primary-content">
+                              		<i class="material-icons mdl-list__item-icon">phone</i>
+                              	<span id="phoneTxt"></span>
+                            </span>
+                            </li>
+                            <li class="mdl-list__item">
+                             	<span class="mdl-list__item-primary-content">
+                              		<i class="material-icons mdl-list__item-icon">timer</i>
+                            	<span id="hoursTxt"></span>
+                            </span>
+                            </li>
+						</ul>
+						<hr/>
+						<span class="mdl-typography--subhead">Accepted Materials<span>
+						<ul class="mdl-list" id="materialsList">
+						</ul>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+	<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+	<script src="js/index.js"></script>
+    <script src="phonegap.js"></script>
+	<script>
+		$.urlParam = function(name) {
+			var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+			return results[1] || 0;
+		}
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open("GET", "https://data.kingcounty.gov/resource/tzui-ygc5.json?providerid=" + $.urlParam("id"), true);
+		xmlhttp.send();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				var providers = JSON.parse(this.responseText);
+                var category = $.urlParam("category");
+				var p = providers[0];
+				document.getElementById("providerTitle").innerHTML = p.provider_name;
+                //document.getElementById("locName").innerHTML = p.provider_name;
+                var latitude = $.urlParam("lat");
+                var longitude = $.urlParam("lng");
+				if (p.provider_url) {
+                    //document.getElementById("websiteLink").href=p.provider_url;
+                    document.getElementById("websiteLink2").href=p.provider_url;
+                } else {
+					document.getElementById("websiteLink2").href="https://www.google.com/search?q="+p.provider_name;
+				}
+				if (p.provider_address) {
+                    document.getElementById("addressTxt").innerHTML = p.provider_address;
+                } else {
+                    document.getElementById("addressTxt").innerHTML = "Address could not be found";
+                }
+				if (p.phone) {
+                    document.getElementById("phoneTxt").innerHTML = p.phone;
+                } else {
+                    document.getElementById("phoneTxt").innerHTML = "Phone number could not be found";
+                }
+				if (p.hours) {
+                    document.getElementById("hoursTxt").innerHTML = p.hours;
+                } else {
+                    document.getElementById("hoursTxt").innerHTML = "Hours of operation could not be found";
+                }
+				if (p.mapping_location) {
+                    document.getElementById("navigateLink").href="https://maps.google.com?saddr=Current+Location&daddr="+p.mapping_location.coordinates[1]+","+p.mapping_location.coordinates[0];
+					var staticMap=document.getElementById("mapCardTitle");
+					var mapUrl = "https://maps.googleapis.com/maps/api/staticmap?center="+p.mapping_location.coordinates[1]+"%2c%20"+p.mapping_location.coordinates[0]+"&zoom=11&scale=2&size=1700x300&markers=color:red|label:Hello|"+p.mapping_location.coordinates[1]+","+p.mapping_location.coordinates[0]+"&key=AIzaSyCiaw0atvDsoNIvrHoM2xaj3M0oHP0ycJs&style=element:geometry%7Ccolor:0xebe3cd&style=element:labels.text.fill%7Ccolor:0x523735&style=element:labels.text.stroke%7Ccolor:0xf5f1e6&style=feature:administrative%7Celement:geometry.stroke%7Ccolor:0xc9b2a6&style=feature:administrative.land_parcel%7Celement:geometry.stroke%7Ccolor:0xdcd2be&style=feature:administrative.land_parcel%7Celement:labels.text.fill%7Ccolor:0xae9e90&style=feature:landscape.natural%7Celement:geometry%7Ccolor:0xdfd2ae&style=feature:poi%7Celement:geometry%7Ccolor:0xdfd2ae&style=feature:poi%7Celement:labels.text.fill%7Ccolor:0x93817c&style=feature:poi.park%7Celement:geometry.fill%7Ccolor:0xa5b076&style=feature:poi.park%7Celement:labels.text.fill%7Ccolor:0x447530&style=feature:road%7Celement:geometry%7Ccolor:0xf5f1e6&style=feature:road.arterial%7Celement:geometry%7Ccolor:0xfdfcf8&style=feature:road.highway%7Celement:geometry%7Ccolor:0xf8c967&style=feature:road.highway%7Celement:geometry.stroke%7Ccolor:0xe9bc62&style=feature:road.highway.controlled_access%7Celement:geometry%7Ccolor:0xe98d58&style=feature:road.highway.controlled_access%7Celement:geometry.stroke%7Ccolor:0xdb8555&style=feature:road.local%7Celement:labels.text.fill%7Ccolor:0x806b63&style=feature:transit.line%7Celement:geometry%7Ccolor:0xdfd2ae&style=feature:transit.line%7Celement:labels.text.fill%7Ccolor:0x8f7d77&style=feature:transit.line%7Celement:labels.text.stroke%7Ccolor:0xebe3cd&style=feature:transit.station%7Celement:geometry%7Ccolor:0xdfd2ae&style=feature:water%7Celement:geometry.fill%7Ccolor:0xb9d3c2&style=feature:water%7Celement:labels.text.fill%7Ccolor:0x92998d";
+
+					staticMap.style.backgroundImage="url("+mapUrl+")";
+					//staticMap.width=Math.min($(window).width(),$(window).height());
+					//staticMap.height=Math.min($(window).width(),$(window).height())/2;
+                    document.getElementById("distanceTxt").innerHTML=Math.round(distanceCoords(p.mapping_location.coordinates[1], p.mapping_location.coordinates[0], latitude, longitude) * 0.621371) + " miles away in " + p.city;
+				} else {
+                    document.getElementById("distanceTxt").innerHTML="Distance could not be calculated";
+                }
+				for(var i = 0; i < providers.length; i++) {
+					var p = providers[i];
+					var listItem = document.createElement("li");
+					listItem.className="mdl-list__item mdl-list__item--three-line";
+					var listItemContent = document.createElement("span");
+					listItemContent.className="mdl-list__item-primary-content materialsListItemPrimaryContent";
+					var listItemTitle = document.createElement("span"); // Title
+					listItemTitle.innerHTML=p.material_handled;
+					var listItemBody = document.createElement("span"); // Body
+					listItemBody.className="mdl-list__item-text-body";
+					var bodyText="";
+					var detailsText = "";
+					if(p.fee) {
+						bodyText+=p.fee+"\t";
+						detailsText+="<b>Fee</b>  "+p.fee+"<br>";
+					}
+					if(p.property_type) {
+						bodyText+="Only for "+p.property_type+"\t";
+						detailsText+="<b>Only for</b>  "+p.property_type+"<br>";
+					}
+					if(p.minimum_volume) {
+						bodyText+=p.minimum_volume+"\t";
+						detailsText+="<b>Minimum</b>  "+p.minimum_volume+"<br>";
+					} else {
+						bodyText+="No minimum volume\t";
+						detailsText+="<b>Minimum</b>  No minimum<br>";
+					}
+					if(p.maximum_volume) {
+						bodyText+=p.maximum_volume+"\t";
+						detailsText+="<b>Maximum</b>  "+p.maximum_volume+"<br>";
+					} else {
+						bodyText+="No maximum volume\t";
+						detailsText+="<b>Maximum</b>  No maximum<br>";
+					}
+					listItemBody.innerHTML=bodyText;
+					listItemContent.appendChild(listItemTitle);
+					listItemContent.appendChild(listItemBody);
+					listItem.appendChild(listItemContent);
+					var listItemDetails = document.createElement("p");
+					listItemDetails.innerHTML=detailsText;
+					listItemDetails.style.visibility="hidden";
+					listItemDetails.style.display="none";
+					listItem.appendChild(listItemDetails);
+					//listItem.setAttribute("title",p.material_handled);
+					listItem.addEventListener("click",function(e) {
+						var targetElement = e.target || e.srcElement;
+						showDialog({
+							title: "Details",
+							text: targetElement.innerHTML,
+							positive: {
+								title: 'OK',
+								onClick: function(e) {
+								}
+							}
+						});
+					});
+					materialsList.appendChild(listItem)
+				}
+			}
+		}
+
+		$(document).ready(function() {
+			document.addEventListener('deviceready', setStatusBarColor, false);
+		});
+
+        var permissions = cordova.plugins.permissions;
+
+        function setStatusBarColor() {
+            if (StatusBar) {
+                StatusBar.backgroundColorByHexString("#338a3e");
+            }
+        }
+	</script>
+</body>
+
+</html>
